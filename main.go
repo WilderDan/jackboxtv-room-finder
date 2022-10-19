@@ -7,6 +7,8 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"flag"
+	"strings"
 )
 
 type Room struct {
@@ -19,6 +21,8 @@ type Room struct {
 	JoinAs           string
 	RequiresPassword bool
 }
+
+var filterStrPtr *string
 
 // makes api calls to endpoint using every code in roomCodes[]
 func findRooms(roomCodes []string) {
@@ -78,11 +82,16 @@ func findRooms(roomCodes []string) {
 			continue
 		}
 
-		fmt.Printf("Room Code: %s, Game: %s \n", color.GreenString(room.RoomId), color.GreenString(room.AppTag))
+		if strings.Contains(strings.ToLower(room.AppTag), strings.ToLower(*filterStrPtr)) {
+			fmt.Printf("Room Code: %s, Game: %s \n", color.GreenString(room.RoomId), color.GreenString(room.AppTag))
+		}
 	}
 }
 
 func main() {
+	filterStrPtr = flag.String("filter", "", "display only room codes for games whose name contain the given string")
+	flag.Parse()
+
 	fmt.Println("Finding open rooms...")
 
 	// concurrency to speed up the process of finding rooms
